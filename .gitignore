@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+공사콕 데이터 작업/
+완료한것/
+*.csv
+*.xlsx
+
 # Distribution / packaging
 .Python
 build/
