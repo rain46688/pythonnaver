@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import re
+import json
 
 def get_data(keyword):
 
@@ -66,14 +67,6 @@ def get_data(keyword):
             tit_wrap_data = [item.strip()
                              for item in (tdata).split('\n') if item.strip()]
 
-        # PLACE_INFO 데이터 파싱
-        place_info_data = ""
-        # PLACE_INFO 데이터가 있을 경우 파싱
-        if (ad_item.find('a', class_='place_info') != None):
-            pdata = ad_item.find('a', class_='place_info').text
-            place_info_data = [item.strip()
-                               for item in (pdata).split('\n') if item.strip()]
-
         # DESC 영역 데이터 파싱
         desc_data = ""
         # DESC 영역 데이터가 있을 경우 파싱
@@ -103,18 +96,70 @@ def get_data(keyword):
             for br in brnum:
                 br = br.replace('-', '')
                 brum_list.append(br)
-            brnum = brum_list    
+            brnum = brum_list
 
-        # 데이터 추가
-        ads_info.append({
-            "URL": url_data[0],
-            "TIT_WRAP": tit_wrap_data,
-            "DESC": desc_data,
-            "Brnum" : brnum,
-        })
-
+        # 사업자 등록 번호로 사업자 정보 조회    
+        result = business_info(brnum)
+        
+        if result == "no_business_data":
+            # 데이터 추가
+            ads_info.append({
+                "URL": url_data2,
+                "법인명" : 'no data',
+                "사업자등록번호" : 'no data',
+                "주소" : 'no data',
+                "대표자명" : 'no data',
+                "법인여부" : 'no data',
+                "우편번호" : 'no data',
+                "도메인명" : 'no data',
+                "전화번호" : 'no data',
+                "TIT_WRAP": tit_wrap_data,
+                "DESC": desc_data,
+            })
+        else:
+            # 데이터 추가
+            ads_info.append({
+                "URL": url_data2,
+                "법인명" : result['bzmnNm'],
+                "사업자등록번호" : result['brno'],
+                "주소" : result['lctnRnAddr'],
+                "대표자명" : result['rprsvNm'],
+                "법인여부" : result['corpYnNm'],
+                "우편번호" : result['lctnRnOzip'],
+                "도메인명" : result['domnCn'],
+                "전화번호" : result['telno'],
+                "TIT_WRAP": tit_wrap_data,
+                "DESC": desc_data,
+            })
     # 결과 반환
     return ads_info
+
+# 사업자 등록 번호로 사업자 정보 조회
+def business_info(brnum_list):
+    try:
+        for brnum in brnum_list:
+            url = f'http://apis.data.go.kr/1130000/MllBsDtl_1Service/getMllBsInfoDetail_1?serviceKey=WnSxz8IYNPKD1GHWGrbiTrwza%2BLcTvpWYdnr%2Famh6shKS07Aby1pHf7LPZd7TcDRPFHg%2FcfTFEkuECPIeivhmw%3D%3D&pageNo=1&numOfRows=10&resultType=json&brno={brnum}'
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            items = data['items']
+            if len(items) == 0:
+                return "no_business_data"
+            
+            info_data = {
+                'bzmnNm' : items[0]['bzmnNm'],
+                'brno' : items[0]['brno'],
+                'lctnRnAddr' : items[0]['lctnRnAddr'],
+                'rprsvNm' : items[0]['rprsvNm'],
+                'corpYnNm' : items[0]['corpYnNm'],
+                'lctnRnOzip' : items[0]['lctnRnOzip'],
+                'domnCn' : items[0]['domnCn'],
+                'telno' : items[0]['telno'],
+            }
+            return info_data
+    except Exception as e:
+        print(e)
+        return "no_business_data"
 
 # 엑셀로 내보내기
 def expoert_excel(data):
