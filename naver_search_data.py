@@ -5,11 +5,7 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import re
-import json
 
 def get_data(keyword):
 
@@ -101,36 +97,22 @@ def get_data(keyword):
         # 사업자 등록 번호로 사업자 정보 조회    
         result = business_info(brnum)
         
-        if result == "no_business_data":
-            # 데이터 추가
-            ads_info.append({
-                "URL": url_data2,
-                "법인명" : 'no data',
-                "사업자등록번호" : 'no data',
-                "주소" : 'no data',
-                "대표자명" : 'no data',
-                "법인여부" : 'no data',
-                "우편번호" : 'no data',
-                "도메인명" : 'no data',
-                "전화번호" : 'no data',
-                "TIT_WRAP": tit_wrap_data,
-                "DESC": desc_data,
-            })
-        else:
-            # 데이터 추가
-            ads_info.append({
-                "URL": url_data2,
-                "법인명" : result['bzmnNm'],
-                "사업자등록번호" : result['brno'],
-                "주소" : result['lctnRnAddr'],
-                "대표자명" : result['rprsvNm'],
-                "법인여부" : result['corpYnNm'],
-                "우편번호" : result['lctnRnOzip'],
-                "도메인명" : result['domnCn'],
-                "전화번호" : result['telno'],
-                "TIT_WRAP": tit_wrap_data,
-                "DESC": desc_data,
-            })
+        # 데이터 추가
+        ads_info.append({
+            "URL": url_data2,
+            "법인명": result['bzmnNm'] if result != "no_business_data" else 'no data',
+            "사업자등록번호": result['brno'] if result != "no_business_data" else 'no data',
+            "주소": result['lctnRnAddr'] if result != "no_business_data" else 'no data',
+            "대표자명": result['rprsvNm'] if result != "no_business_data" else 'no data',
+            "법인여부": result['corpYnNm'] if result != "no_business_data" else 'no data',
+            "우편번호": result['lctnRnOzip'] if result != "no_business_data" else 'no data',
+            "도메인명": result['domnCn'] if result != "no_business_data" else 'no data',
+            "전화번호": result['telno'] if result != "no_business_data" else 'no data',
+            "TIT_WRAP": tit_wrap_data,
+            "DESC": desc_data,
+            "URL_DATA": url_data[0],
+        })
+
     # 결과 반환
     return ads_info
 
@@ -143,6 +125,7 @@ def business_info(brnum_list):
             response.raise_for_status()
             data = response.json()
             items = data['items']
+            
             if len(items) == 0:
                 return "no_business_data"
             
