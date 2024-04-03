@@ -74,7 +74,7 @@ def get_data(keyword):
          # 광고 데이터 제외
         keywords = ['blog.naver', 'smartstore.naver.', 'lotteon',
                     'gsshop', 'gmarket', 'cjonstyle', '11st', 'yes24', 'coupang', 'auction', 'youtube', 'yadoc','숨고','cafe.naver'
-                    'temu']
+                    'temu','navimro' ,'ssg' ,'ohou','place.naver' , ,'선거의신' , '기프트한국', 'soomgo','kmong' ,'tmon']
         contains_keyword = any(
             key_item in url_data[0] for key_item in keywords)
         if (contains_keyword):
