@@ -73,7 +73,8 @@ def get_data(keyword):
 
          # 광고 데이터 제외
         keywords = ['blog.naver', 'smartstore.naver.', 'lotteon',
-                    'gsshop', 'gmarket', 'cjonstyle', '11st', 'yes24', 'coupang', 'auction', 'youtube', 'yadoc']
+                    'gsshop', 'gmarket', 'cjonstyle', '11st', 'yes24', 'coupang', 'auction', 'youtube', 'yadoc','숨고','cafe.naver'
+                    'temu']
         contains_keyword = any(
             key_item in url_data[0] for key_item in keywords)
         if (contains_keyword):
@@ -100,17 +101,17 @@ def get_data(keyword):
         # 데이터 추가
         ads_info.append({
             "URL": url_data2,
-            "법인명": result['bzmnNm'] if result != "no_business_data" else 'no data',
-            "사업자등록번호": result['brno'] if result != "no_business_data" else 'no data',
-            "주소": result['lctnRnAddr'] if result != "no_business_data" else 'no data',
-            "대표자명": result['rprsvNm'] if result != "no_business_data" else 'no data',
-            "법인여부": result['corpYnNm'] if result != "no_business_data" else 'no data',
-            "우편번호": result['lctnRnOzip'] if result != "no_business_data" else 'no data',
-            "도메인명": result['domnCn'] if result != "no_business_data" else 'no data',
-            "전화번호": result['telno'] if result != "no_business_data" else 'no data',
-            "TIT_WRAP": tit_wrap_data,
-            "DESC": desc_data,
-            "URL_DATA": url_data[0],
+            "법인명": result['bzmnNm'] if result != "no_business_data" else 'N/A',
+            "사업자번호": result['brno'] if result != "no_business_data" else brnum,
+            "주소": result['lctnRnAddr'] if result != "no_business_data" else 'N/A',
+            "대표자명": result['rprsvNm'] if result != "no_business_data" else 'N/A',
+            "법인여부": result['corpYnNm'] if result != "no_business_data" else 'N/A',
+            "우편번호": result['lctnRnOzip'] if result != "no_business_data" else 'N/A',
+            "도메인명": result['domnCn'] if result != "no_business_data" else 'N/A',
+            "전화번호": result['telno'] if result != "no_business_data" else 'N/A',
+            "타이틀 데이터": tit_wrap_data,
+            "주석 데이터": desc_data,
+            "URL 관련 데이터": url_data[0],
         })
 
     # 결과 반환
@@ -119,15 +120,18 @@ def get_data(keyword):
 # 사업자 등록 번호로 사업자 정보 조회
 def business_info(brnum_list):
     try:
-        for brnum in brnum_list:
+        for index, brnum in enumerate(brnum_list):
             url = f'http://apis.data.go.kr/1130000/MllBsDtl_1Service/getMllBsInfoDetail_1?serviceKey=WnSxz8IYNPKD1GHWGrbiTrwza%2BLcTvpWYdnr%2Famh6shKS07Aby1pHf7LPZd7TcDRPFHg%2FcfTFEkuECPIeivhmw%3D%3D&pageNo=1&numOfRows=10&resultType=json&brno={brnum}'
             response = requests.get(url)
             response.raise_for_status()
             data = response.json()
             items = data['items']
+
+            if brnum_list == 'no brnum' or (len(brnum_list) - 1 == index and len(items) == 0):
+                return "no_business_data"
             
             if len(items) == 0:
-                return "no_business_data"
+                continue
             
             info_data = {
                 'bzmnNm' : items[0]['bzmnNm'],
@@ -169,7 +173,7 @@ def get_footer(url):
             footer_text = soup.find('footer').get_text()
         elif soup.find('div', class_='footer') != None:
             footer_text = soup.find('div', class_='footer').get_text()
-        elif soup.find('div', id='footer') is not None:
+        elif soup.find('div', id='footer') != None:
             footer_text = soup.find('div', id='footer').get_text()
         else:
             footer_text = soup.get_text()
