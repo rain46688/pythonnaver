@@ -10,6 +10,7 @@ __pycache__/
 완료한것/
 *.csv
 *.xlsx
+*.lnk
 
 # Distribution / packaging
 .Python
