@@ -74,7 +74,7 @@ def get_data(keyword):
          # 광고 데이터 제외
         keywords = ['blog.naver', 'smartstore.naver.', 'lotteon',
                     'gsshop', 'gmarket', 'cjonstyle', '11st', 'yes24', 'coupang', 'auction', 'youtube', 'yadoc','숨고','cafe.naver',
-                    'temu','navimro' ,'ssg' ,'ohou','place.naver','선거의신' , '기프트한국', 'soomgo','kmong' ,'tmon']
+                    'temu','navimro' ,'ssg' ,'ohou','place.naver','선거의신' , '기프트한국', 'soomgo','kmong' ,'tmon', '엠알오','롯데','다나와','쇼핑','GSSHOP','toolsmro']
         contains_keyword = any(
             key_item in url_data[0] for key_item in keywords)
         if (contains_keyword):
@@ -127,7 +127,7 @@ def business_info(brnum_list):
             data = response.json()
             items = data['items']
 
-            if brnum_list == 'no brnum' or (len(brnum_list) - 1 == index and len(items) == 0):
+            if brnum_list == 'no brnum' or (len(brnum_list) - 1 == index and len(items) == 0) or len(brnum_list) > 5:
                 return "no_business_data"
             
             if len(items) == 0:
@@ -177,6 +177,12 @@ def get_footer(url):
             footer_text = soup.find('div', id='footer').get_text()
         else:
             footer_text = soup.get_text()
+            # 추가 로직
+            find_all_tags = soup.find_all(lambda tag: tag.name != 'script' and ('번호' in tag.text or '사업' in tag.text))
+
+            for tag in find_all_tags:
+                tag_string = str(tag)
+                footer_text += tag_string
 
         return footer_text
     except Exception as e:
